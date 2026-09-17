@@ -118,6 +118,7 @@ const CHARS: &[char] = &[
 ];
 
 pub const RENDEZVOUS_SERVERS: &[&str] = &["rs-ny.rustdesk.com"];
+pub const ONLY_ALLOW_PRIVATE_RENDEZVOUS_SERVER: bool = true;
 pub const RS_PUB_KEY: &str = "OeVuKk5nlHiXp+APNn0Y3pC1Iwpwn44JGqrQCsWqmBw=";
 
 pub const RENDEZVOUS_PORT: i32 = 21116;
@@ -918,16 +919,16 @@ impl Config {
         if rendezvous_server.is_empty() {
             rendezvous_server = PROD_RENDEZVOUS_SERVER.read().unwrap().clone();
         }
-        if rendezvous_server.is_empty() {
+        if rendezvous_server.is_empty() && !ONLY_ALLOW_PRIVATE_RENDEZVOUS_SERVER {
             rendezvous_server = CONFIG2.read().unwrap().rendezvous_server.clone();
         }
-        if rendezvous_server.is_empty() {
+        if rendezvous_server.is_empty() && !ONLY_ALLOW_PRIVATE_RENDEZVOUS_SERVER {
             rendezvous_server = Self::get_rendezvous_servers()
                 .drain(..)
                 .next()
                 .unwrap_or_default();
         }
-        if !rendezvous_server.contains(':') {
+        if !rendezvous_server.is_empty() && !rendezvous_server.contains(':') {
             rendezvous_server = format!("{rendezvous_server}:{RENDEZVOUS_PORT}");
         }
         rendezvous_server
@@ -945,6 +946,9 @@ impl Config {
         let s = PROD_RENDEZVOUS_SERVER.read().unwrap().clone();
         if !s.is_empty() {
             return vec![s];
+        }
+        if ONLY_ALLOW_PRIVATE_RENDEZVOUS_SERVER {
+            return Vec::new();
         }
         let serial_obsolute = CONFIG2.read().unwrap().serial > SERIAL;
         if serial_obsolute {
