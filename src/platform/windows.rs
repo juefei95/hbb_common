@@ -154,7 +154,7 @@ pub fn sync_cpu_usage(cpu_usage: Option<f64>) {
         None => None,
     };
     *CPU_USAGE_ONE_MINUTE.lock().unwrap() = v;
-    log::info!("cpu usage synced: {:?}", cpu_usage);
+    log::info!("CPU 使用率同步完成：{:?}", cpu_usage);
 }
 
 // https://learn.microsoft.com/en-us/windows/win32/sysinfo/targeting-your-application-at-windows-8-1
